@@ -1,0 +1,23 @@
+:root {
+    /* Brand Colors */
+    --primary-color: #4E54C8;       /* 고급스러운 블루 퍼플 */
+    --primary-dark: #3c40a0;
+    --accent-color: #FF6B6B;        /* 포인트 컬러 (판매완료 등) */
+    
+    /* Grayscale */
+    --text-main: #1a1a1a;
+    --text-sub: #767676;
+    --bg-body: #f8f9fa;
+    --bg-white: #ffffff;
+    --border-color: #e1e2e3;
+
+    /* Layout */
+    --container-width: 1200px;
+    --header-height: 70px;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    
+    /* Shadow */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+}

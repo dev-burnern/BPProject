@@ -1,0 +1,90 @@
+/* 전체 배경 */
+body {
+    background-color: var(--bg-body);
+    padding-top: var(--header-height); /* 헤더 높이만큼 띄움 */
+}
+
+/* 1. 헤더 (Sticky Navigation) */
+.site-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--header-height);
+    background: var(--bg-white);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    backdrop-filter: blur(10px); /* 반투명 블러 효과 */
+}
+
+.header-container {
+    width: 100%;
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between; /* 로고 - 검색 - 메뉴 분산 */
+    align-items: center;
+}
+
+.logo a {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--primary-color);
+    letter-spacing: -1px;
+}
+
+/* 2. 네비게이션 */
+.user-nav ul {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.user-nav a {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-main);
+    transition: color 0.2s;
+}
+
+.user-nav .highlight a {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+/* 3. 메인 컨테이너 */
+.main-content {
+    width: 100%;
+}
+
+.container {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+/* 섹션 공통 */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--text-main);
+    padding-bottom: 10px;
+}
+
+.section-header h3 {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+/* 4. 푸터 */
+.site-footer {
+    background: #2c3e50;
+    color: #bdc3c7;
+    padding: 40px 0;
+    margin-top: 60px;
+    text-align: center;
+    font-size: 14px;
+}

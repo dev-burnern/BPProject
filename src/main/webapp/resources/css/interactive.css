@@ -1,0 +1,26 @@
+/* 버튼 호버 */
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* 네비게이션 호버 */
+.user-nav a:hover {
+    color: var(--primary-color);
+}
+
+/* 상품 카드 호버 효과 */
+.product-card:hover {
+    transform: translateY(-5px); /* 위로 살짝 뜸 */
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-color);
+}
+
+.product-card:hover .img-box img {
+    transform: scale(1.05); /* 이미지 살짝 확대 */
+}
+
+/* 검색 버튼 호버 */
+.search-box button:hover {
+    background-color: var(--primary-dark);
+}
