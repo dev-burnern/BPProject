@@ -12,6 +12,7 @@ import javax.servlet.http.HttpSession;
 
 import com.keyhub.dto.BoardDTO;
 import com.keyhub.dto.MemberDTO;
+import com.keyhub.dto.PageInfoDTO;
 import com.keyhub.dto.ReplyDTO;
 import com.keyhub.service.BoardService;
 import com.keyhub.service.ReplyService;
@@ -29,35 +30,54 @@ public class BoardController extends HttpServlet {
     protected void service(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
+        request.setCharacterEncoding("UTF-8"); // [Safety] 한글 처리를 위해 인코딩 설정 명시
+        
         String pathInfo = request.getPathInfo();
         String contextPath = request.getContextPath();
 
-        // 1. 목록 화면 (GET) + 페이징
+     // 1. 목록 화면 (GET)
         if ("/list".equals(pathInfo)) {
-            String pageStr = request.getParameter("page");
-            int page = 1;
-            if (pageStr != null && !pageStr.isEmpty()) {
-                page = Integer.parseInt(pageStr);
+            // 1. 페이지 번호 파싱
+            int currentPage = 1;
+            if (request.getParameter("page") != null && !request.getParameter("page").isEmpty()) {
+                currentPage = Integer.parseInt(request.getParameter("page"));
             }
 
-            int pageSize = 10; 
-            int blockLimit = 5; 
+            // 2. 검색어 파싱
+            String keyword = request.getParameter("keyword");
 
-            int totalCount = boardService.getTotalCount();
-            int totalPages = (int) Math.ceil((double) totalCount / pageSize);
+            int pageLimit = 5; 
+            int boardLimit = 10; 
+            int listCount = 0;
+            List<BoardDTO> list = null;
 
-            List<BoardDTO> list = boardService.getBoardListPaging(page, pageSize);
+            // 3. 검색어 유무에 따른 분기 처리
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                // 검색 로직
+                listCount = boardService.getSearchCount(keyword);
+                list = boardService.getSearchList(keyword, currentPage, boardLimit);
+                request.setAttribute("searchKeyword", keyword); // 검색어 유지용
+            } else {
+                // 일반 목록 로직
+                listCount = boardService.getTotalCount();
+                list = boardService.getBoardListPaging(currentPage, boardLimit);
+            }
 
-            int startPage = (((int)(Math.ceil((double)page / blockLimit))) - 1) * blockLimit + 1;
-            int endPage = startPage + blockLimit - 1;
+            // 4. 페이징 계산 (공통)
+            int maxPage = (int) Math.ceil((double) listCount / boardLimit);
+            int startPage = (currentPage - 1) / pageLimit * pageLimit + 1;
+            int endPage = startPage + pageLimit - 1;
             
-            if (endPage > totalPages) {
-                endPage = totalPages;
-            }
+            if (endPage > maxPage) { endPage = maxPage; }
 
+            PageInfoDTO pi = new PageInfoDTO(listCount, currentPage, pageLimit, boardLimit, maxPage, startPage, endPage);
+
+            // 5) 결과 전달
             request.setAttribute("boardList", list);
-            request.setAttribute("page", page);             
-            request.setAttribute("totalPages", totalPages); 
+            request.setAttribute("pi", pi);
+            
+            request.setAttribute("page", currentPage);             
+            request.setAttribute("totalPages", maxPage); 
             request.setAttribute("startPage", startPage);   
             request.setAttribute("endPage", endPage);       
 
@@ -73,8 +93,6 @@ public class BoardController extends HttpServlet {
         }
         // 3. 글쓰기 처리 (POST)
         else if ("/write".equals(pathInfo) && "POST".equals(request.getMethod())) {
-            request.setCharacterEncoding("UTF-8");
-            
             String title = request.getParameter("title");
             String content = request.getParameter("content");
             
@@ -112,6 +130,7 @@ public class BoardController extends HttpServlet {
             HttpSession session = request.getSession();
             MemberDTO user = (MemberDTO) session.getAttribute("user");
             
+            // 본인 확인
             if (user == null || !user.getId().equals(board.getWriterId())) {
                 response.sendRedirect(contextPath + "/board/detail?bNo=" + bNo);
                 return;
@@ -122,8 +141,6 @@ public class BoardController extends HttpServlet {
         }
         // 6. 글 수정 처리 (POST)
         else if ("/update".equals(pathInfo) && "POST".equals(request.getMethod())) {
-            request.setCharacterEncoding("UTF-8");
-            
             int bNo = Integer.parseInt(request.getParameter("bNo"));
             String title = request.getParameter("title");
             String content = request.getParameter("content");
@@ -149,6 +166,7 @@ public class BoardController extends HttpServlet {
             HttpSession session = request.getSession();
             MemberDTO user = (MemberDTO) session.getAttribute("user");
             
+            // 본인 확인
             if (user == null || !user.getId().equals(board.getWriterId())) {
                 response.sendRedirect(contextPath + "/board/detail?bNo=" + bNo);
                 return;

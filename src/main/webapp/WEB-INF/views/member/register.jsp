@@ -44,6 +44,20 @@
         <div class="auth-container">
             <h2 class="auth-title">회원가입</h2>
             
+            <%-- 중복 아이디 에러 메시지 --%>
+            <c:if test="${param.error == 'duplicate'}">
+                <div style="background-color: #ffebee; color: #c62828; padding: 10px; border-radius: 4px; margin-bottom: 20px; font-size: 14px; text-align: center;">
+                    ⚠️ 이미 사용 중인 아이디입니다. 다른 아이디를 입력해주세요.
+                </div>
+            </c:if>
+            
+            <%-- 기존 에러 메시지 --%>
+            <c:if test="${param.error == 'fail'}">
+                <div style="background-color: #ffebee; color: #c62828; padding: 10px; border-radius: 4px; margin-bottom: 20px; font-size: 14px; text-align: center;">
+                    ⚠️ 회원가입에 실패했습니다. 다시 시도해주세요.
+                </div>
+            </c:if>
+            
             <form action="${ctx}/member/register" method="post">
                 <div class="form-group">
                     <label class="form-label">아이디</label>

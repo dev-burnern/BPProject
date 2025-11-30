@@ -68,12 +68,12 @@ public class MarketService {
     public List<ProductDTO> getRecentProducts(int limit) {
         return marketDAO.selectRecentProducts(limit);
     }
- // 10. 내 판매 상품 수 조회 (마이페이지용)
-    public int getMyProductCount(String userId) {
-        return marketDAO.countProductsBySeller(userId);
-    }
- // 11. 내 주문 내역 조회
+ // 10. 내 주문 내역 조회
     public List<OrderDTO> getMyOrderList(String memberId) {
         return marketDAO.selectOrderList(memberId);
+    }
+ // 11. 내 판매 상품 목록 조회
+    public List<ProductDTO> getMyProductList(String sellerId) {
+        return marketDAO.selectProductsBySeller(sellerId);
     }
 }

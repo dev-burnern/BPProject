@@ -52,4 +52,14 @@ public class BoardService {
         int offset = (page - 1) * pageSize;
         return boardDAO.selectBoardListByPage(offset, pageSize);
     }
+ // [NEW] 검색 게시글 수
+    public int getSearchCount(String keyword) {
+        return boardDAO.countSearchBoards(keyword);
+    }
+
+    // [NEW] 검색 게시글 목록
+    public List<BoardDTO> getSearchList(String keyword, int page, int pageSize) {
+        int offset = (page - 1) * pageSize;
+        return boardDAO.selectSearchBoards(keyword, offset, pageSize);
+    }
 }

@@ -77,7 +77,7 @@ public class MarketDAO {
         return count;
     }
 
-    // [MODIFIED] 3. 상품 목록 조회 (페이징 + 카테고리)
+    //  3. 상품 목록 조회 
     public List<ProductDTO> selectProducts(String category, PageInfoDTO pi) {
         List<ProductDTO> list = new ArrayList<>();
         
@@ -90,7 +90,7 @@ public class MarketDAO {
             sql.append(" AND category = ?");
         }
         
-        // 정렬 및 페이징 (H2/MySQL 기준)
+        // 정렬 및 페이징 
         sql.append(" ORDER BY p_no DESC LIMIT ? OFFSET ?");
         
         try (Connection conn = DBConnection.getConnection();
@@ -113,7 +113,7 @@ public class MarketDAO {
         return list;
     }
     
-    // [MODIFIED] 4. 검색 (페이징 적용)
+    //  4. 검색 (페이징 적용)
     public List<ProductDTO> searchProducts(String keyword, PageInfoDTO pi) {
         List<ProductDTO> list = new ArrayList<>();
         String sql = "SELECT * FROM PRODUCT WHERE status != 'DELETED' AND (title LIKE ? OR content LIKE ?) " +
@@ -139,7 +139,6 @@ public class MarketDAO {
     
     // 5. 상세 조회
     public ProductDTO selectProductById(int pNo) {
-        // 상세 조회는 삭제된 상품이라도 관리자가 볼 수 있어야 할 수도 있으나, 일반적으론 숨김
         String sql = "SELECT * FROM PRODUCT WHERE p_no = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -195,16 +194,55 @@ public class MarketDAO {
         return 0;
     }
 
-    // [MODIFIED] 9. 상품 삭제 (Soft Delete: 상태만 변경)
-    // 무결성 제약 조건 위반 방지 목적
+ // 9. 상품 삭제 
     public int deleteProduct(int pNo) {
-        String sql = "UPDATE PRODUCT SET status = 'DELETED' WHERE p_no=?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        int result = 0;
+
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false); //트랜잭션 시작 
+
+            // 1. 장바구니(CART)에 담긴 내역 먼저 삭제
+            String sqlCart = "DELETE FROM CART WHERE p_no = ?";
+            pstmt = conn.prepareStatement(sqlCart);
             pstmt.setInt(1, pNo);
-            return pstmt.executeUpdate();
-        } catch (Exception e) { e.printStackTrace(); }
-        return 0;
+            pstmt.executeUpdate();
+            pstmt.close();
+
+            // 2. 주문 내역(ORDERS) 삭제
+            String sqlOrder = "DELETE FROM ORDERS WHERE p_no = ?";
+            pstmt = conn.prepareStatement(sqlOrder);
+            pstmt.setInt(1, pNo);
+            pstmt.executeUpdate();
+            pstmt.close();
+
+            // 3. 상품(PRODUCT) 최종 삭제
+            String sqlProduct = "DELETE FROM PRODUCT WHERE p_no = ?";
+            pstmt = conn.prepareStatement(sqlProduct);
+            pstmt.setInt(1, pNo);
+            result = pstmt.executeUpdate(); // 삭제된 행의 개수 반환
+
+            conn.commit(); //모든 삭제가 성공하면 실제 DB 반영
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                if (conn != null) conn.rollback(); // 에러 나면 되돌리기
+            } catch (Exception rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
+        } finally {
+            // 자원 해제
+            try {
+                if (pstmt != null) pstmt.close();
+                if (conn != null) conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
     }
 
     // 10. 주문 저장
@@ -231,7 +269,7 @@ public class MarketDAO {
             pstmt.executeUpdate();
         } catch (Exception e) { e.printStackTrace(); }
     }
- // [NEW] 12. 내 주문 내역 조회 (JOIN Product)
+ //  12. 내 주문 내역 조회 (JOIN Product)
     public List<OrderDTO> selectOrderList(String memberId) {
         List<OrderDTO> list = new ArrayList<>();
         // ORDERS 테이블과 PRODUCT 테이블을 조인하여 주문 정보 + 상품 정보를 가져옴
@@ -278,6 +316,24 @@ public class MarketDAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return list;
+    }
+	// 13. 내 판매 상품 목록 조회
+    public List<ProductDTO> selectProductsBySeller(String sellerId) {
+        List<ProductDTO> list = new ArrayList<>();
+        String sql = "SELECT * FROM PRODUCT WHERE seller_id = ? AND status != 'DELETED' ORDER BY p_no DESC";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, sellerId);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToDTO(rs)); 
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
         return list;
     }
 

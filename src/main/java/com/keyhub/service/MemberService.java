@@ -7,27 +7,29 @@ public class MemberService {
     
     private MemberDAO memberDAO = new MemberDAO();
 
-    // 회원가입 로직
-    public boolean register(MemberDTO member) {
-        int result = memberDAO.insertMember(member);
-        return result > 0;
+    // 회원가입 로직 (수정됨)
+    public int register(MemberDTO member) {
+        // 1. 아이디 중복 체크
+        // 이미 해당 아이디를 가진 회원이 존재하면 -1 반환
+        if (memberDAO.getMemberById(member.getId()) != null) {
+            return -1; 
+        }
+
+        // 2. 가입 진행
+        return memberDAO.insertMember(member);
     }
 
     // 로그인 로직
     public MemberDTO login(String id, String inputPassword) {
-        // 1. 아이디로 회원 정보 가져오기
         MemberDTO member = memberDAO.getMemberById(id);
-        
-        // 2. 회원이 있고, 비밀번호가 일치하는지 확인 (단순 문자열 비교)
         if (member != null && member.getPassword().equals(inputPassword)) {
-            return member; // 로그인 성공 시 회원 정보 반환
+            return member;
         }
-        
-        return null; // 실패 시 null
+        return null;
     }
- // 정보 수정
+
+    // 정보 수정
     public boolean modifyMember(MemberDTO member) {
         return memberDAO.updateMember(member) > 0;
     }
-    
 }

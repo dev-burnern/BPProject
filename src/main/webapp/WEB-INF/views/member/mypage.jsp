@@ -34,7 +34,8 @@
 
     .profile-img {
         width: 100px; height: 100px;
-        background: #eee; border-radius: 50%;
+        background: #eee;
+        border-radius: 50%;
         margin: 0 auto 20px;
         display: flex; align-items: center; justify-content: center;
         font-size: 40px; color: #ccc;
@@ -49,7 +50,8 @@
     }
 
     .profile-info {
-        text-align: left; border-top: 1px solid #eee; padding-top: 20px;
+        text-align: left; border-top: 1px solid #eee;
+        padding-top: 20px;
     }
 
     .info-row {
@@ -62,25 +64,7 @@
     /* 오른쪽: 활동 내역 (대시보드) */
     .activity-section { flex: 3; }
 
-    .dashboard-grid {
-        display: grid; grid-template-columns: repeat(3, 1fr);
-        gap: 20px; margin-bottom: 30px;
-    }
-
-    .stat-card {
-        background: white; padding: 20px;
-        border-radius: var(--radius-md);
-        border: 1px solid var(--border-color);
-        text-align: center;
-    }
-
-    .stat-number {
-        font-size: 24px; font-weight: 800;
-        color: var(--primary-color); display: block;
-    }
-
-    .stat-label { font-size: 14px; color: var(--text-sub); }
-
+    /* 리스트 스타일 */
     .recent-list {
         background: white; padding: 20px;
         border-radius: var(--radius-md);
@@ -89,19 +73,22 @@
     }
 
     .list-header {
-        font-weight: 700; margin-bottom: 15px;
+        font-weight: 700;
+        margin-bottom: 15px;
         padding-bottom: 10px; border-bottom: 1px solid #eee;
         display: flex; justify-content: space-between; align-items: center;
     }
 
     .empty-msg {
         text-align: center; padding: 40px 0;
-        color: var(--text-sub); font-size: 14px;
+        color: var(--text-sub);
+        font-size: 14px;
     }
 
     /* 리스트 아이템 공통 스타일 */
     .list-item {
-        display: flex; align-items: center;
+        display: flex;
+        align-items: center;
         padding: 15px 0; border-bottom: 1px solid #eee;
     }
     .list-item:last-child { border-bottom: none; }
@@ -123,7 +110,8 @@
     
     /* 주문 상태 뱃지 */
     .status-badge {
-        display: inline-block; padding: 4px 8px; border-radius: 4px; 
+        display: inline-block;
+        padding: 4px 8px; border-radius: 4px; 
         font-size: 12px; font-weight: bold; color: white; background: #aaa;
     }
     .status-badge.done { background: var(--primary-color); }
@@ -154,27 +142,14 @@
                     </div>
                 </div>
 
-                <a href="${ctx}/member/edit" class="btn-primary" style="display:block; width: 100%; margin-top: 20px; font-size: 14px; text-align:center; padding: 10px 0;">
+                <a href="${ctx}/member/edit" class="btn-primary" style="display:block;
+                    width: 100%; margin-top: 20px; font-size: 14px; text-align:center; padding: 10px 0;">
                     내 정보 수정
                 </a>            
             </aside>
 
             <section class="activity-section">
-                <div class="dashboard-grid">
-                    <div class="stat-card">
-                        <span class="stat-number">${myCartList.size()}</span> 
-                        <span class="stat-label">장바구니</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-number">${myOrderList.size()}</span> 
-                        <span class="stat-label">주문 내역</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-number">${productCount}</span> 
-                        <span class="stat-label">판매 중</span>
-                    </div>
-                </div>
-
+                
                 <div class="recent-list">
                     <div class="list-header">
                         <span>🛒 나의 장바구니</span> 
@@ -262,6 +237,74 @@
                                                 배송지: ${order.address}
                                             </div>
                                         </div> 
+                                    </li>
+                                </c:forEach>
+                            </ul>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+
+                <div class="recent-list">
+                    <div class="list-header">
+                        <span>🏷️ 판매 중인 상품</span> 
+                        <span style="font-size: 12px; color: #888;">총 ${myProductList.size()}개</span>
+                    </div>
+
+                    <c:choose>
+                        <c:when test="${empty myProductList}">
+                            <div class="empty-msg">판매 중인 상품이 없습니다.</div>
+                        </c:when>
+                        <c:otherwise>
+                            <ul style="padding: 0 10px;">
+                                <c:forEach var="p" items="${myProductList}">
+                                    <li class="list-item">
+                                        <div class="item-img-box">
+                                            <c:choose>
+                                                <c:when test="${p.imgUrl == 'no_image.png'}">
+                                                    <img src="${ctx}/resources/images/common/no_image.png">
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <img src="${ctx}/image?name=${p.imgUrl}">
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+
+                                        <div class="item-info">
+                                            <a href="${ctx}/market/detail?pNo=${p.pNo}" class="item-title">
+                                                ${p.title}
+                                            </a> 
+                                            
+                                            <div style="font-size: 13px; color: #666;">
+                                                <span style="color:var(--primary-color); font-weight:bold;">
+                                                    <fmt:formatNumber value="${p.price}" />원
+                                                </span>
+                                                <span style="margin: 0 5px; color:#ddd;">|</span>
+                                                <span>등록일: <fmt:formatDate value="${p.regDate}" pattern="yyyy.MM.dd"/></span>
+                                            </div>
+                                            
+                                            <div style="margin-top: 5px;">
+                                                <c:choose>
+                                                    <c:when test="${p.status == 'SOLD'}">
+                                                        <span class="status-badge done">판매완료</span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="status-badge" style="background:#4E54C8;">판매중</span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                        </div> 
+                                        
+                                        <div style="display:flex; flex-direction:column; gap:5px;">
+                                            <a href="${ctx}/market/edit?pNo=${p.pNo}"
+                                               style="padding: 4px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; color: #333; text-align:center;">
+                                                수정
+                                            </a>
+                                            <a href="${ctx}/market/delete?pNo=${p.pNo}"
+                                               onclick="return confirm('정말 삭제하시겠습니까?')"
+                                               style="padding: 4px 10px; border: 1px solid #ffdede; background:#fff0f0; border-radius: 4px; font-size: 12px; color: #d32f2f; text-align:center;">
+                                                삭제
+                                            </a>
+                                        </div>
                                     </li>
                                 </c:forEach>
                             </ul>

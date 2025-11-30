@@ -212,5 +212,51 @@ public class BoardDAO {
         }
         return list;
     }
+ // 11. 검색된 게시글 수 조회
+    public int countSearchBoards(String keyword) {
+        int count = 0;
+        String sql = "SELECT COUNT(*) FROM BOARD WHERE title LIKE ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, "%" + keyword + "%");
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    count = rs.getInt(1);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return count;
+    }
+
+    // 12. 검색된 게시글 목록 조회 
+    public List<BoardDTO> selectSearchBoards(String keyword, int offset, int limit) {
+        List<BoardDTO> list = new ArrayList<>();
+        String sql = "SELECT * FROM BOARD WHERE title LIKE ? ORDER BY b_no DESC LIMIT ? OFFSET ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, "%" + keyword + "%");
+            pstmt.setInt(2, limit);
+            pstmt.setInt(3, offset);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    BoardDTO b = new BoardDTO();
+                    b.setbNo(rs.getInt("b_no"));
+                    b.setTitle(rs.getString("title"));
+                    b.setContent(rs.getString("content"));
+                    b.setWriterId(rs.getString("writer_id"));
+                    b.setViews(rs.getInt("views"));
+                    b.setRegDate(rs.getTimestamp("reg_date"));
+                    list.add(b);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
 }
 

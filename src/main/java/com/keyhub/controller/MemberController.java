@@ -13,6 +13,7 @@ import javax.servlet.http.HttpSession;
 import com.keyhub.dto.CartDTO;
 import com.keyhub.dto.MemberDTO;
 import com.keyhub.dto.OrderDTO;
+import com.keyhub.dto.ProductDTO;
 import com.keyhub.service.BoardService;
 import com.keyhub.service.CartService;
 import com.keyhub.service.MarketService;
@@ -41,7 +42,7 @@ public class MemberController extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/member/register.jsp")
                    .forward(request, response);
         }
-        // 2. 회원가입 처리 (POST)
+     // 2. 회원가입 처리 (POST)
         else if ("/register".equals(pathInfo) && "POST".equals(request.getMethod())) {
             MemberDTO member = new MemberDTO();
             member.setId(request.getParameter("id"));
@@ -49,11 +50,17 @@ public class MemberController extends HttpServlet {
             member.setName(request.getParameter("name"));
             member.setEmail(request.getParameter("email"));
 
-            boolean isSuccess = memberService.register(member);
+            // int형 결과 받기
+            int result = memberService.register(member);
 
-            if (isSuccess) {
+            if (result > 0) {
+                // 성공 시 로그인 페이지로
                 response.sendRedirect(contextPath + "/member/login");
+            } else if (result == -1) {
+                // [추가] 중복 아이디인 경우
+                response.sendRedirect(contextPath + "/member/register?error=duplicate");
             } else {
+                // 기타 실패
                 response.sendRedirect(contextPath + "/member/register?error=fail");
             }
         }
@@ -102,8 +109,8 @@ public class MemberController extends HttpServlet {
             request.setAttribute("boardCount", boardCount);
             
             // 3. 판매 내역(상품) 개수 가져오기
-            int productCount = marketService.getMyProductCount(user.getId());
-            request.setAttribute("productCount", productCount);
+            List<ProductDTO> myProductList = marketService.getMyProductList(user.getId());
+            request.setAttribute("myProductList", myProductList);
             
             // 4. 주문(구매) 내역 가져오기
             List<OrderDTO> myOrderList = marketService.getMyOrderList(user.getId());
