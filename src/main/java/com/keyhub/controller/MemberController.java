@@ -12,6 +12,7 @@ import javax.servlet.http.HttpSession;
 
 import com.keyhub.dto.CartDTO;
 import com.keyhub.dto.MemberDTO;
+import com.keyhub.dto.OrderDTO;
 import com.keyhub.service.BoardService;
 import com.keyhub.service.CartService;
 import com.keyhub.service.MarketService;
@@ -24,7 +25,7 @@ public class MemberController extends HttpServlet {
     
     // 서비스 객체 준비
     private MemberService memberService = new MemberService();
-    private CartService cartService = new CartService(); // [NEW] 장바구니 서비스 추가
+    private CartService cartService = new CartService();
     private BoardService boardService = new BoardService();
     private MarketService marketService = new MarketService();
     
@@ -103,6 +104,10 @@ public class MemberController extends HttpServlet {
             // 3. 판매 내역(상품) 개수 가져오기
             int productCount = marketService.getMyProductCount(user.getId());
             request.setAttribute("productCount", productCount);
+            
+            // 4. 주문(구매) 내역 가져오기
+            List<OrderDTO> myOrderList = marketService.getMyOrderList(user.getId());
+            request.setAttribute("myOrderList", myOrderList);
             
             request.getRequestDispatcher("/WEB-INF/views/member/mypage.jsp")
                    .forward(request, response);

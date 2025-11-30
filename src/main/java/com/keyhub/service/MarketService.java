@@ -72,4 +72,8 @@ public class MarketService {
     public int getMyProductCount(String userId) {
         return marketDAO.countProductsBySeller(userId);
     }
+ // 11. 내 주문 내역 조회
+    public List<OrderDTO> getMyOrderList(String memberId) {
+        return marketDAO.selectOrderList(memberId);
+    }
 }

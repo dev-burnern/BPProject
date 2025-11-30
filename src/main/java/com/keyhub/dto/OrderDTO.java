@@ -9,6 +9,11 @@ public class OrderDTO {
     private String address;
     private int amount;
     private Timestamp orderDate;
+    
+    // [NEW] 화면 표시용 상품 정보 필드 추가
+    private String productTitle;
+    private String productImg;
+    private String sellerId;
 
     public int getoNo() { return oNo; }
     public void setoNo(int oNo) { this.oNo = oNo; }
@@ -22,4 +27,12 @@ public class OrderDTO {
     public void setAmount(int amount) { this.amount = amount; }
     public Timestamp getOrderDate() { return orderDate; }
     public void setOrderDate(Timestamp orderDate) { this.orderDate = orderDate; }
+    
+    // [NEW] Getters and Setters for Display
+    public String getProductTitle() { return productTitle; }
+    public void setProductTitle(String productTitle) { this.productTitle = productTitle; }
+    public String getProductImg() { return productImg; }
+    public void setProductImg(String productImg) { this.productImg = productImg; }
+    public String getSellerId() { return sellerId; }
+    public void setSellerId(String sellerId) { this.sellerId = sellerId; }
 }

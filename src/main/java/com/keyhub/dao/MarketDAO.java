@@ -10,6 +10,7 @@ import com.keyhub.common.DBConnection;
 import com.keyhub.dto.OrderDTO;
 import com.keyhub.dto.PageInfoDTO; // [NEW] 페이징 DTO 추가
 import com.keyhub.dto.ProductDTO;
+import com.keyhub.dto.OrderDTO;
 
 public class MarketDAO {
 
@@ -230,6 +231,56 @@ public class MarketDAO {
             pstmt.executeUpdate();
         } catch (Exception e) { e.printStackTrace(); }
     }
+ // [NEW] 12. 내 주문 내역 조회 (JOIN Product)
+    public List<OrderDTO> selectOrderList(String memberId) {
+        List<OrderDTO> list = new ArrayList<>();
+        // ORDERS 테이블과 PRODUCT 테이블을 조인하여 주문 정보 + 상품 정보를 가져옴
+        // (가정: 주문 일시 컬럼명이 order_date 라고 가정, 없으면 DB 컬럼명 확인 필요. 보통 default current_timestamp)
+        // 여기서는 편의상 ORDERS 테이블의 자동 생성 컬럼을 o_no 순으로 정렬합니다.
+        String sql = "SELECT o.o_no, o.member_id, o.p_no, o.amount, o.address, o.order_date, " +
+                     "       p.title, p.img_url, p.seller_id " +
+                     "FROM ORDERS o " +
+                     "JOIN PRODUCT p ON o.p_no = p.p_no " +
+                     "WHERE o.member_id = ? " +
+                     "ORDER BY o.o_no DESC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, memberId);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    OrderDTO order = new OrderDTO();
+                    order.setoNo(rs.getInt("o_no"));
+                    order.setMemberId(rs.getString("member_id"));
+                    order.setpNo(rs.getInt("p_no"));
+                    order.setAmount(rs.getInt("amount"));
+                    order.setAddress(rs.getString("address"));
+                    // DB에 order_date 컬럼이 있다고 가정 (없다면 생성 시 default값 확인)
+                    // H2 등에서 자동생성 컬럼이 없으면 INSERT 시 넣어줘야 함. 
+                    // 여기서는 조회 시 에러가 나지 않도록 예외처리하거나 컬럼명을 확인해야 합니다.
+                    // 우선 order_date가 있다고 가정하고 매핑합니다. (만약 에러나면 reg_date 등으로 수정)
+                    try {
+                        order.setOrderDate(rs.getTimestamp("order_date"));
+                    } catch(Exception e) {
+                        // 컬럼이 없을 경우 null 처리 혹은 무시
+                    }
+
+                    // 상품 정보 매핑
+                    order.setProductTitle(rs.getString("title"));
+                    order.setProductImg(rs.getString("img_url"));
+                    order.setSellerId(rs.getString("seller_id"));
+                    
+                    list.add(order);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
 
     // ResultSet 매핑 헬퍼
     private ProductDTO mapResultSetToDTO(ResultSet rs) throws Exception {

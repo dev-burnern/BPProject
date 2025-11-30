@@ -26,7 +26,6 @@
                     <c:when test="${not empty sessionScope.user}">
                         <li class="highlight"><a href="${ctx}/member/mypage">내 정보</a></li>
                         <li><a href="${ctx}/member/logout">로그아웃</a></li>
-                        <li class="cart-btn"><a href="${ctx}/member/mypage">장바구니</a></li>
                     </c:when>
                     <c:otherwise>
                         <li><a href="${ctx}/member/login">로그인</a></li>
